@@ -55,7 +55,7 @@ public class Game
                     }
                     else if (selectedPath == "south")
                     {
-                        Console.WriteLine(messages.GetMessage("south_path_narrative"));
+                        HandleMerchantEncounter(player, messages);
                     }
                     else if (selectedPath == "north")
                     {
@@ -130,6 +130,39 @@ public class Game
                 return "exit";
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
+        }
+    }
+
+    private void HandleMerchantEncounter(Player player, Messages messages)
+    {
+        Console.WriteLine(messages.GetMessage("merchant_intro"));
+        while (true)
+        {
+            Console.WriteLine(messages.GetMessage("merchant_offer"));
+            Console.Write(messages.GetMessage("enter_choice"));
+            string? input = Console.ReadLine()?.Trim();
+
+            if (input == "1")
+            {
+                player.Weapon = new Weapon("Magical " + player.Weapon?.Type, (player.Weapon?.MaxDamage ?? 10) + 5, "✨" + (player.Weapon?.AsciiArt ?? ""));
+                Console.WriteLine(messages.GetMessage("merchant_weapon_success"));
+                return;
+            }
+            else if (input == "2")
+            {
+                player.Armor = new Armor("Magical Armor", 5);
+                Console.WriteLine(messages.GetMessage("merchant_armor_success"));
+                return;
+            }
+            else if (input == "3")
+            {
+                Console.WriteLine(messages.GetMessage("merchant_none"));
+                return;
+            }
+            else
+            {
+                Console.WriteLine(messages.GetMessage("invalid"));
+            }
         }
     }
 

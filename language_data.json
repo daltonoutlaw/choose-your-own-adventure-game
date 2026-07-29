@@ -69,6 +69,13 @@
       "dragon_damage_reply_2": "Impressive! You might actually be worth toasting...",
       "dragon_damage_reply_3": "That... was unexpected. But I assure you, it won't happen again.",
       "dragon_damage_reply_4": "Well, I'll be! You have more bite than I thought!",
+      "merchant_intro": "You encounter a mysterious merchant. He offers you a choice: a magical weapon or magical armor. Both are free!",
+      "merchant_offer": "1. Magical Weapon. 2. Magical Armor. 3. Neither.",
+      "merchant_weapon_success": "You have received a powerful magical weapon!",
+      "merchant_armor_success": "You have received a sturdy magical armor!",
+      "merchant_none": "You decide to take nothing.",
+      "stats_armor": "Armor: ",
+      "stats_protection": "Armor's Protection Points: ",
       "enter_choice": "Enter choice: "
     },
     "raceMap": {
