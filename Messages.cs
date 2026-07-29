@@ -26,39 +26,51 @@ public class Messages
     public void ReadDictionary()
     {
         string jsonPath = Path.Combine(AppContext.BaseDirectory, "language_data.json");
-        string jsonText = File.ReadAllText(jsonPath);
-        using JsonDocument doc = JsonDocument.Parse(jsonText);
+        
+        if (!File.Exists(jsonPath))
+        {
+            throw new FileNotFoundException($"Language data file not found at: {jsonPath}");
+        }
 
-        JsonElement langSection = doc.RootElement.GetProperty(CurrentLanguage);
+        try
+        {
+            string jsonText = File.ReadAllText(jsonPath);
+            using JsonDocument doc = JsonDocument.Parse(jsonText);
 
-        _dictionary = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("dictionary").EnumerateObject())
-            _dictionary[entry.Name] = entry.Value.GetString() ?? string.Empty;
+            if (!doc.RootElement.TryGetProperty(CurrentLanguage, out JsonElement langSection))
+            {
+                throw new Exception($"Language '{CurrentLanguage}' not found in language data.");
+            }
 
-        _raceMap = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("raceMap").EnumerateObject())
-            _raceMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
+            // Helper to safely load dictionaries
+            Dictionary<string, string> LoadMap(string propertyName)
+            {
+                var map = new Dictionary<string, string>();
+                if (langSection.TryGetProperty(propertyName, out JsonElement section))
+                {
+                    foreach (JsonProperty entry in section.EnumerateObject())
+                        map[entry.Name] = entry.Value.GetString() ?? string.Empty;
+                }
+                return map;
+            }
 
-        _occupationMap = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("occupationMap").EnumerateObject())
-            _occupationMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
-
-        _displayRaceMap = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("displayRaceMap").EnumerateObject())
-            _displayRaceMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
-
-        _displayOccupationMap = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("displayOccupationMap").EnumerateObject())
-            _displayOccupationMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
-
-        _displayWeaponMap = new Dictionary<string, string>();
-        foreach (JsonProperty entry in langSection.GetProperty("displayWeaponMap").EnumerateObject())
-            _displayWeaponMap[entry.Name] = entry.Value.GetString() ?? string.Empty;
+            _dictionary = LoadMap("dictionary");
+            _raceMap = LoadMap("raceMap");
+            _occupationMap = LoadMap("occupationMap");
+            _displayRaceMap = LoadMap("displayRaceMap");
+            _displayOccupationMap = LoadMap("displayOccupationMap");
+            _displayWeaponMap = LoadMap("displayWeaponMap");
+        }
+        catch (JsonException ex)
+        {
+            throw new Exception($"Error parsing language data: {ex.Message}", ex);
+        }
     }
 
     public string GetMessage(string key)
     {
-        return _dictionary.ContainsKey(key) ? _dictionary[key] : $"[{key}]";
+        if (string.IsNullOrWhiteSpace(key)) return "[empty_key]";
+        return _dictionary.TryGetValue(key, out string? value) ? value : $"[{key}]";
     }
 
     public bool IsValidRace(string? input)
